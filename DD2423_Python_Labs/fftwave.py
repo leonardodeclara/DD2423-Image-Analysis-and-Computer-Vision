@@ -17,6 +17,11 @@ def fftwave(u, v, sz = 128):
 	a1.title.set_text("Fhat: (u, v) = (%d, %d)" % (u, v))
 	
 	# What is done by these instructions?
+	# fftshift moves the zero-frequency component to the center of the spectrum by swapping the first
+	# and third quadrant with the second and forth.
+	# Once the zero frequency component is shifted to the center of the spectrum using fftshift,
+	# these instructions compute the new coordinates of (p,q) with respect to the center of the spectrum.
+	# while before their range was [0, sz-1], now it is [-sz/2, sz/2-1]
 	if u < sz/2:
 		uc = u
 	else:
@@ -26,10 +31,14 @@ def fftwave(u, v, sz = 128):
 	else:
 		vc = v - sz
 
-	wavelength = 0.0 # Replace by correct expression
-	amplitude  = 0.0 # Replace by correct expression
+
+	wavelength = sz/np.sqrt(uc**2 + vc**2) # Replace by correct expression
+	
+	amplitude  = np.max(np.abs(Fhat))/sz**2 # Replace by correct expression
+
 	
 	a2 = f.add_subplot(3, 2, 2)
+	#it shifts the zero-frequency component to the center of the spectrum
 	showgrey(np.fft.fftshift(Fhat), False)
 	a2.title.set_text("centered Fhat: (uc, vc) = (%d, %d)" % (uc, vc))
 	
@@ -50,4 +59,3 @@ def fftwave(u, v, sz = 128):
 	a6.title.set_text("angle(F) (wavelength %f)" % wavelength)
 	
 	plt.show()
-
