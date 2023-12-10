@@ -3,7 +3,7 @@ import math
 import numpy as np
 from PIL import Image, ImageFilter
 import matplotlib.pyplot as plt
-from lab3_orig import kmeans_segm
+from lab3 import kmeans_segm
 from Functions import showgrey, mean_segments, overlay_bounds
 from scipy.ndimage.filters import gaussian_filter
 from scipy.spatial import distance_matrix
@@ -12,7 +12,7 @@ def mean_shift_segm(I, spatial_bandwidth, colour_bandwidth, num_iterations):
 
     print('Find colour channels with K-means...')
     K = 16 # number of channels
-    [ segm, centers ] = kmeans_segm(I, K, 20, 4321)
+    segm, centers,_ = kmeans_segm(I, K, 20, 4321)
     ( height, width, depth ) = np.shape(I)
     idx = np.reshape(segm, (height, width))
     mapsw = np.zeros((height, width, K))

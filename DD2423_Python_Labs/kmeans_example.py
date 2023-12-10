@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from lab3 import kmeans_segm
 from Functions import mean_segments, overlay_bounds
 
-def kmeans_example():
+def kmeans_example(K=10, L=50, seed=14, scale_factor=0.5, image_sigma=1.0):
     K = 10              # number of clusters used
     L = 50              # number of iterations
     seed = 14           # seed used for random initialization
@@ -18,7 +18,7 @@ def kmeans_example():
     h = ImageFilter.GaussianBlur(image_sigma)
     I = np.asarray(img.filter(ImageFilter.GaussianBlur(image_sigma))).astype(np.float32)
     
-    segm, centers = kmeans_segm(I, K, L, seed)
+    segm, centers,_ = kmeans_segm(I, K, L, seed)
     Inew = mean_segments(img, segm)
     if True:
         Inew = overlay_bounds(img, segm)
