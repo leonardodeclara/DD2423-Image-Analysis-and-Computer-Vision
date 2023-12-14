@@ -184,8 +184,8 @@ def graphcut_example():
     scale_factor = 0.5           # image downscale factor
     area = [ 80, 110, 570, 300 ] # image region to train foreground with [ minx, miny, maxx, maxy ]
     K = 16                       # number of mixture components
-    alpha = 8.0                  # maximum edge cost
-    sigma = 20.0                 # edge cost decay factor
+    alpha = 15.0                  # maximum edge cost
+    sigma = 10.0                 # edge cost decay factor
 
     img = Image.open('Images-jpg/tiger1.jpg')
     img = img.resize((int(img.size[0]*scale_factor), int(img.size[1]*scale_factor)))

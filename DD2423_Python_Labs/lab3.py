@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from Functions import *
 from gaussfft import gaussfft
 from PIL import Image,ImageFilter
+from scipy.stats import multivariate_normal
 
 
 def kmeans_segm(image, K, L, seed = 42, early_stopping=False):
@@ -63,7 +64,9 @@ def kmeans_segm(image, K, L, seed = 42, early_stopping=False):
         # Recompute all distances between pixels and cluster centers
         distances = distance_matrix(image_to_segm, centers)
     num_iterations = i + 1 
-    segmentation = np.reshape(segmentation, image.shape[:2])
+
+    if (len(image.shape) == 3):
+        segmentation = np.reshape(segmentation, image.shape[:2])
 
     return segmentation, centers, num_iterations
 
@@ -81,5 +84,42 @@ def mixture_prob(image, K, L, mask):
         mask - an integer image where mask=1 indicates pixels used 
     Output:
         prob: an image with probabilities per pixel
-    """ 
+    """
+
+    image = image / 255
+    Ivec = np.reshape(image, (-1, 3)).astype(np.float32)
+    m = np.reshape(mask, (-1))
+    Ivec_masked = Ivec[np.reshape(np.nonzero(m == 1), (-1))]
+    size = np.shape(Ivec_masked)[0]
+    segs, centers,_ = kmeans_segm(Ivec_masked, K, L)
+    covariances = np.zeros((K, 3, 3))
+    p = np.ones((size, K)) * 0.001
+    g = np.zeros((size, K))
+    for i in range(K):
+        covariances[i]=np.eye(3) * 0.01
+
+    w = np.zeros(K)
+    for i in range(K):
+        w[i] = len(np.nonzero(segs == i)) / size
+
+    for i in range(L):
+        for j in range(K):
+            g[:, j] = w[j] * multivariate_normal(centers[j], covariances[j]).pdf(Ivec_masked)
+
+        for j in range(K):
+            p[:, j] = np.divide(g[:, j], np.sum(g, axis=1), where=np.sum(g, axis=1)!=0)
+
+        for j in range(K):
+            w[j] = np.mean(p[:,j])
+            centers[j,:] = np.dot(np.transpose(p[:, j]), Ivec_masked) / np.sum(p[:, j])
+            diff = Ivec_masked - centers[j,:]
+            covariances[j] = np.dot(np.transpose(diff), diff * np.reshape(p[:, j], (-1, 1))) / np.sum(p[:, j])
+
+    prob = np.zeros((np.shape(Ivec)[0], K))
+    for i in range(K):
+        prob[:, i] = w[i] * multivariate_normal(centers[i], covariances[i]).pdf(Ivec)
+        prob[:, i] = prob[:, i] / np.sum(prob[:, i])
+
+    prob = np.sum(prob, axis=1)
+    prob = np.reshape(prob, (np.shape(image)[0], np.shape(image)[1]))
     return prob
