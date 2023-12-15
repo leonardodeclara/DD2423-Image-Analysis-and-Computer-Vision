@@ -89,8 +89,12 @@ def mixture_prob(image, K, L, mask):
     image = image / 255
     Ivec = np.reshape(image, (-1, 3)).astype(np.float32)
     m = np.reshape(mask, (-1))
+
+    # Remove masked pixels
     Ivec_masked = Ivec[np.reshape(np.nonzero(m == 1), (-1))]
     size = np.shape(Ivec_masked)[0]
+
+    # Compute segmentation and centers with kmeans on masked pixels
     segs, centers,_ = kmeans_segm(Ivec_masked, K, L)
     covariances = np.zeros((K, 3, 3))
     p = np.ones((size, K)) * 0.001
@@ -104,18 +108,22 @@ def mixture_prob(image, K, L, mask):
 
     for i in range(L):
         for j in range(K):
+            
             g[:, j] = w[j] * multivariate_normal(centers[j], covariances[j]).pdf(Ivec_masked)
 
         for j in range(K):
+            # Expectation step: compute probabilityn for each pixel to belong to each cluster
             p[:, j] = np.divide(g[:, j], np.sum(g, axis=1), where=np.sum(g, axis=1)!=0)
 
         for j in range(K):
+            # Maximization step: update weights, means and covariances
             w[j] = np.mean(p[:,j])
             centers[j,:] = np.dot(np.transpose(p[:, j]), Ivec_masked) / np.sum(p[:, j])
             diff = Ivec_masked - centers[j,:]
             covariances[j] = np.dot(np.transpose(diff), diff * np.reshape(p[:, j], (-1, 1))) / np.sum(p[:, j])
 
     prob = np.zeros((np.shape(Ivec)[0], K))
+    # Compute probability of the color for each pixel
     for i in range(K):
         prob[:, i] = w[i] * multivariate_normal(centers[i], covariances[i]).pdf(Ivec)
         prob[:, i] = prob[:, i] / np.sum(prob[:, i])
