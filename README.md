@@ -1,6 +1,9 @@
-# DD2423-Image-Analysis-and-Computer-Vision
-DD2423 - Image Analysis and Computer Vision laboratory assignments @ KTH Royal Institute of Technology
+# DD2423 - Image Analysis and Computer Vision
 
-Lab1: Filtering Operations <br>
-Lab2: Edge Detection & Hough Transform <br>
-Lab3: Image Segmentation <br>
+Assignments for the 2023/24 KTH course <em>Image Analysis and Computer Vision</em>.
+
+| Laboratory | Topic              
+| -------- | ------------------------ 
+| 1        | Filtering Operations           |
+| 2        | Edge Detection & Hough Transform |
+| 3        | Image Segmentation    |
